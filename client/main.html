@@ -28,17 +28,17 @@
   {{/if}}
   </section>
 
-  <h1>Policy Garden</h1>
+  <h1>iEngine Sketchbook</h1>
 
   <div class="garden-map">
     <div id="cy"></div>
     <button class="refresh-graph">refresh garden map</button>
   </div>
 
-  {{#if adminView}}  
+  {{#if adminView}}
 
   <section class="goals">
-    <h2>Edit Goals</h2>
+    <h2>Edit Target Node</h2>
 
     <select class="load-goal">
       <option value="select">select to edit</option>
@@ -51,11 +51,11 @@
         {{>node selectedGoal}}
       {{/if}}
     </div>
-    <button class="create-goal">create goal</button>
+    <button class="create-goal">create Target Node</button>
   </section>
 
   <section class="policies">
-    <h2>Edit Policies</h2>
+    <h2>Edit Lever Nodes</h2>
     <select class="load-policy">
       <option value="select">select to edit</option>
       {{#each policies}}
@@ -67,26 +67,26 @@
         {{>node selectedPolicy}}
       {{/if}}
     </div>
-    <button class="create-policy">create policy</button>
+    <button class="create-policy">create Lever Node</button>
   </section>
 
   {{else}}
-  
+
   <section class="playerview">
-    <h2>Are We Reaching Our Goals?</h2>
+    <h2>Are We Reaching Our Targets?</h2>
     <ol>
       {{#each goalsSorted}}
         <li>{{title}} (level: {{level}}, outflow: {{currentOutflow}})</li>
       {{/each}}
     </ol>
-    <h2>Our Strongest Policies</h2>
+    <h2>the current most effective levers</h2>
     <ol>
       {{#each policiesSorted}}
         {{> policyShort}}
       {{/each}}
-    </ol>  
+    </ol>
   </section>
-  
+
   {{/if}}
 
   <section class="players">
@@ -104,10 +104,10 @@
       <button class="create-player">create player</button>
     {{/if}}
   </section>
-  
+
     <div id="jsonOutput"></div>
     <div id="jsonImport"><textarea class="json-import-data"></textarea><br><button class="json-import">import JSON</button></div>
-  
+
 </body>
 
 <template name="policyShort">
@@ -138,6 +138,9 @@
       <div class="data-row">
         <label>activation amount</label><input name="threshold" class="number" value="{{threshold}}">
       </div>
+      <div class="data-row">
+        <label>group</label><input name="group" class="number" value="{{group}}">
+      </div>
       <!--div class="data-row">
         <label>max total outflow</label><input name="maxOutflow" class="number" value="{{maxOutflow}}">
       </div-->
@@ -165,4 +168,3 @@
     <label>{{targetTitle}}</label><input name="bandwidth" value="{{bandwidth}}">
   </div>
 </template>
-

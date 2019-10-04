@@ -33,7 +33,7 @@ Template.body.helpers({
   snapshots() { return Snapshots.find({}) },
   optionSelected() { return this.name == Session.get("snapshotSelected") ? "selected" : "" },
   snapshotSelected() { return Session.get("snapshotSelected") }
-      
+
 })
 
 Template.body.events({
@@ -47,7 +47,7 @@ Template.body.events({
     var state = SimulationState.findOne()
     if(state) {
       SimulationState.update(state._id, {$set: {speed:Number(event.target.value)}})
-    } 
+    }
   },
   "change .load-goal"(event, template) {
     if(event.target.value != "load") {
@@ -59,19 +59,19 @@ Template.body.events({
       Session.set("policySelected", event.target.value)
     }
   },
-  "click .create-goal"(event) {    
+  "click .create-goal"(event) {
     var id = Meteor.call("nodes.create", "goal", function(error, result) {
-      Session.set("goalSelected", result)  
+      Session.set("goalSelected", result)
       updatePolicyGraph()
     })
   },
-  "click .create-policy"(event) {    
+  "click .create-policy"(event) {
     var id = Meteor.call("nodes.create", "policy", function(error, result) {
       Session.set("policySelected", result)
-      updatePolicyGraph      
+      updatePolicyGraph
     })
   },
-  "click .create-player"(event) {    
+  "click .create-player"(event) {
     Meteor.call("nodes.create", "player", updatePolicyGraph)
   },
   "click .toggle-admin-view"(event) {
@@ -99,7 +99,7 @@ Template.body.events({
           updatePolicyGraph()
           Session.set("snapshotSelected", event.target.value == "empty" ? null : event.target.value)
         })
-      } 
+      }
     }
   },
   "click .delete-snapshot"(event) {
@@ -125,7 +125,7 @@ Template.body.events({
 
 Template.body.rendered = function() {
   Meteor.setTimeout(function() {
-    updatePolicyGraph()    
+    updatePolicyGraph()
   }, 2000)
 }
 
@@ -158,7 +158,7 @@ Template.node.helpers({
     return NodeConnections.find({source: this._id}).count() > 0
   },
   adminView() { return Session.get("adminView") }
-  
+
 })
 
 Template.node.events({
@@ -170,7 +170,7 @@ Template.node.events({
         this[event.target.name] = Number(event.target.value) // convert input to number
       } else {
         this[event.target.name] = event.target.value
-      }      
+      }
     }
     Nodes.update(this._id, this)
   },
@@ -198,7 +198,7 @@ Template.connection.helpers({
     return totalBandwidth < maxBandwidth
   },
   subPossible() {
-    return this.bandwidth > 0 
+    return this.bandwidth > 0
   },
 
 })
@@ -231,9 +231,6 @@ Template.connection.events({
       }
     }
   }
-  
+
 
 })
-  
-  
-  
