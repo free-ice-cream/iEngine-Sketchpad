@@ -162,22 +162,27 @@ Template.node.helpers({
 })
 
 Template.node.events({
-  "change input"(event) {
-    if(event.target.name == "replenish") {
-      this["decay"] = -Number(event.target.value) // call negative decay "replenish" for player nodes
-    } else {
-      if($(event.target).hasClass("number")) {
-        this[event.target.name] = Number(event.target.value) // convert input to number
-      } else {
-        this[event.target.name] = event.target.value
-      }
-    }
-    Nodes.update(this._id, this)
-  },
+  // "change input"(event) {
+  //   if(event.target.name == "replenish") {
+  //     this["decay"] = -Number(event.target.value) // call negative decay "replenish" for player nodes
+  //   } else {
+  //     if($(event.target).hasClass("number")) {
+  //       this[event.target.name] = Number(event.target.value) // convert input to number
+  //     } else {
+  //       this[event.target.name] = event.target.value
+  //     }
+  //   }
+  //   Nodes.update(this._id, this)
+  // },
   "click .delete-node"(event) {
     if(confirm("permanently delete node?")) {
       Meteor.call("nodes.delete", this._id, updatePolicyGraph)
     }
+  },
+  "click .save-node"(event){
+    //
+    console.log("_id = "+ this._id)
+
   }
 })
 

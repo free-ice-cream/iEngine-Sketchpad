@@ -1,11 +1,11 @@
 import { Meteor } from 'meteor/meteor';
 
 // code to run on server at startup
-Meteor.startup(() => {  
+Meteor.startup(() => {
   // initialize simulation state
   var state = SimulationState.findOne()
   if(state) {
-    SimulationState.update(state._id, {$set: {running: false}}) 
+    SimulationState.update(state._id, {$set: {running: false}})
   } else {
     SimulationState.insert({
       running: false,
@@ -18,7 +18,7 @@ var simulationInterval = null
 
 // (re)start the simulation with specified speed
 startSimulation = function() {
-  simulationInterval = Meteor.setInterval(simulationStep, SimulationState.findOne().speed)  
+  simulationInterval = Meteor.setInterval(simulationStep, SimulationState.findOne().speed)
 }
 
 // stop the simulation
@@ -29,10 +29,10 @@ stopSimulation = function() {
 
 // run a step in the simulation
 simulationStep = function() {
-  
+
   // 1st iteration over all nodes: decay & inflow
   Nodes.find({state: "active"}).fetch().forEach(function(node) {
-  
+
     // apply decay (replenishment)
     node.level -= node.decay
     if(node.level < 0) {
@@ -42,15 +42,15 @@ simulationStep = function() {
     // apply inflow
     node.level += node.inflow
     node.inflow = 0
-    
+
     // persist level and inflow
     Nodes.update(node._id, {$set: {level: node.level, inflow: node.inflow}})
 
   })
-  
+
   // 2rd iteration over all nodes: overflow & outflow
   Nodes.find({state: "active"}).fetch().forEach(function(node) {
-    
+
     // determine available outflow to transfer
     var availableForOutflow = node.level - node.threshold
     if(availableForOutflow < 0) {
@@ -59,60 +59,60 @@ simulationStep = function() {
     if(availableForOutflow > node.maxOutflow && node.maxOutflow > 0) {
       availableForOutflow = node.maxOutflow
     }
-    
+
     // apply outflow
     var currentOutflow = 0
     if(availableForOutflow > 0) {
       NodeConnections.find({source: node._id}).fetch().forEach(function(connection) {
         if(connection.bandwidth > 0) {
           var amount = (connection.bandwidth / 100.0) * availableForOutflow // calculate part of outflow for this conection
-          var target = Nodes.findOne(connection.target) 
+          var target = Nodes.findOne(connection.target)
           if(!target.inflow) {
             target.inflow = 0
           }
-          target.inflow += amount // add amount to target inFlow                 
+          target.inflow += amount // add amount to target inFlow
           Nodes.update(target._id, {$set: {inflow: target.inflow}}) // persist inflow on target
-          
+
           //substract outflow from source level
           node.level -= amount
-          currentOutflow += amount          
+          currentOutflow += amount
         }
       })
     }
-    
+
     // apply overflow
     if(node.level > node.overflow && node.overflow > 0) {
       node.level = node.overflow
-    }    
-    
+    }
+
     // persist outflow and overflow
     Nodes.update(node._id, {$set: {level: node.level, currentOutflow: currentOutflow}})
-  
+
   })
-  
-  
+
+
 }
 
 // methods called from the clients
-Meteor.methods({  
-  
+Meteor.methods({
+
   // turn simulation on/off
   "simulation.toggle"() {
     var state = SimulationState.findOne()
     if(state.running) {
-      SimulationState.update(state._id, {$set: {running: false}})  
+      SimulationState.update(state._id, {$set: {running: false}})
       stopSimulation()
     } else {
-      SimulationState.update(state._id, {$set: {running: true}})  
+      SimulationState.update(state._id, {$set: {running: true}})
       startSimulation()
     }
   },
-  
+
   // do a manual simulation step
   "simulation.step"() {
     simulationStep()
   },
-  
+
   // create a new node
   "nodes.create"(type) {
     var title = type + " " + (Nodes.find({type: type}).count() + 1)
@@ -120,14 +120,14 @@ Meteor.methods({
     var decay = 0
     var threshold = 0
     var overflow = 0
-    
+
     if(type == "player") {
       decay = -1
     }
-    
+
     var uuid = generateUuid()
 
-    // create the node    
+    // create the node
     var newNodeId = Nodes.insert({
       _id: uuid,
       title: title,
@@ -142,7 +142,7 @@ Meteor.methods({
       currentOutflow: 0,
       state: "active"
     })
-    
+
     // add connections depending on type of created node
     Nodes.find({state: "active"}).forEach(function(node) {
       if(node._id != newNodeId) { // no node connects to itself
@@ -155,7 +155,7 @@ Meteor.methods({
               target: node._id,
               bandwidth: 0,
               state: "active"
-            })            
+            })
           }
         }
         if(type == "policy") {
@@ -167,7 +167,7 @@ Meteor.methods({
               target: node._id,
               bandwidth: 0,
               state: "active"
-            })            
+            })
           }
           if(node.type == "player" || node.type == "policy") {
             NodeConnections.insert({
@@ -176,7 +176,7 @@ Meteor.methods({
               target: newNodeId,
               bandwidth: 0,
               state: "active"
-            })  
+            })
           }
         }
         if(type == "goal") {
@@ -188,7 +188,7 @@ Meteor.methods({
               target: node._id,
               bandwidth: 0,
               state: "active"
-            })            
+            })
           }
           if(node.type == "policy" || node.type == "goal") {
             NodeConnections.insert({
@@ -197,33 +197,33 @@ Meteor.methods({
               target: newNodeId,
               bandwidth: 0,
               state: "active"
-            })              
+            })
           }
         }
       }
-    }) 
+    })
 
-    return uuid;  
+    return uuid;
   },
-  
+
   // delete a node
   "nodes.delete"(id) {
     Nodes.remove(id)
     NodeConnections.remove({source:id})
     NodeConnections.remove({target:id})
   },
-  
+
   // creates a new snapshot
   "snapshots.create"(name) {
     Snapshots.insert({
       name: name
     })
-    // make a copy of all currently active nodes & connections with snapshot name    
-    
+    // make a copy of all currently active nodes & connections with snapshot name
+
     // iterate over nodes -> save translation object for new ids
     var newId = {}
     var connections = []
-    
+
     Nodes.find({state: "active"}).fetch().forEach(function(node) {
       var oldId = node._id
       delete node._id
@@ -232,21 +232,21 @@ Meteor.methods({
       newId[oldId] = Nodes.insert(node)
       connections.push.apply(connections, NodeConnections.find({source: oldId}).fetch())
     })
-    
+
     connections.forEach(function(connection) {
       delete connection._id
       connection.source = newId[connection.source]
       connection.target = newId[connection.target]
       connection.state = "snapshot"
       connection.snapshot = name
-      NodeConnections.insert(connection)        
+      NodeConnections.insert(connection)
     })
-    
+
   },
-  
+
   // imports a json
   "json.import"(jsonObject) {
-    
+
     // delete all active nodes and their connections
     Nodes.find({state: "active"}).fetch().forEach(function(node) {
       NodeConnections.remove({source: node._id})
@@ -254,8 +254,8 @@ Meteor.methods({
     })
 
     createNodeFromJson = function(jsonNode, type) {
-      
-      // create the node    
+
+      // create the node
       var newNodeId = Nodes.insert({
         _id: jsonNode.id,
         title: jsonNode.name,
@@ -268,7 +268,8 @@ Meteor.methods({
         type: type,
         maxOutflow: 0,
         currentOutflow: 0,
-        state: "active"
+        state: "active",
+        group:jsonNode.group
       })
 
       jsonNode.connections.forEach(function(jsonConnection) {
@@ -278,7 +279,7 @@ Meteor.methods({
           target: jsonConnection.to_id,
           bandwidth: jsonConnection.weight,
           state: "active"
-        })  
+        })
       })
 
     }
@@ -304,7 +305,7 @@ Meteor.methods({
             target: targetNode._id,
             bandwidth: 0,
             state: "active"
-          })  
+          })
         }
       })
     })
@@ -314,14 +315,14 @@ Meteor.methods({
 
   // loads a snapshot
   "snapshots.load"(name) {
-    
+
     // delete all active nodes and their connections
     Nodes.find({state: "active"}).fetch().forEach(function(node) {
       NodeConnections.remove({source: node._id})
       Nodes.remove(node._id)
     })
 
-    // load snapshot 
+    // load snapshot
     var newId = {}
     var connections = []
     Nodes.find({snapshot: name}).forEach(function(node) {
@@ -332,17 +333,17 @@ Meteor.methods({
       newId[oldId] = Nodes.insert(node)
       connections.push.apply(connections, NodeConnections.find({source: oldId}).fetch())
     })
-    
+
     connections.forEach(function(connection) {
       delete connection._id
       connection.source = newId[connection.source]
       connection.target = newId[connection.target]
       connection.state = "active"
-      NodeConnections.insert(connection)        
+      NodeConnections.insert(connection)
     })
-    
+
   },
-  
+
   "snapshots.delete"(name) {
     Nodes.remove({snapshot: name})
     NodeConnections.remove({snapshot: name})
