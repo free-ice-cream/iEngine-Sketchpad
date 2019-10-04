@@ -1,0 +1,168 @@
+<head>
+  <title>Policy Garden</title>
+  <script src="/cytoscape/cytoscape.min.js"></script>
+  <script src="/cytoscape/cytoscape-cose-bilkent.js"></script>
+
+</head>
+
+<body>
+  <section>
+    <button class="toggle-admin-view">{{#if adminView}}switch to player view{{else}}switch to admin view{{/if}}</button>
+  {{#if simulationRunning}}
+    <button class="simulation-toggle">simulation stop</button>
+  {{else}}
+    <label>speed</label> <input class="simulation-speed" value="{{simulationSpeed}}">
+    <button class="simulation-toggle">simulation start</button>
+    <button class="simulation-step">simulation step</button>
+    <button class="take-snapshot">create snapshot</button>
+    <select class="load-snapshot">
+        <option value="load">load snapshot</option>
+        <option disabled>──────────</option>
+        <option value="empty">empty</option>
+      {{#each snapshots}}
+        <option {{optionSelected}} value="{{name}}">{{name}}</option>
+      {{/each}}
+    </select>
+    {{#if snapshotSelected}}<button class="delete-snapshot">delete snapshot</button>{{/if}}
+    <button class="export-json">export json</button>
+  {{/if}}
+  </section>
+
+  <h1>Policy Garden</h1>
+
+  <div class="garden-map">
+    <div id="cy"></div>
+    <button class="refresh-graph">refresh garden map</button>
+  </div>
+
+  {{#if adminView}}  
+
+  <section class="goals">
+    <h2>Edit Goals</h2>
+
+    <select class="load-goal">
+      <option value="select">select to edit</option>
+      {{#each goals}}
+        <option {{goalSelected}} value="{{_id}}">{{title}}</option>
+      {{/each}}
+    </select>
+    <div class="nodes">
+      {{#if selectedGoal}}
+        {{>node selectedGoal}}
+      {{/if}}
+    </div>
+    <button class="create-goal">create goal</button>
+  </section>
+
+  <section class="policies">
+    <h2>Edit Policies</h2>
+    <select class="load-policy">
+      <option value="select">select to edit</option>
+      {{#each policies}}
+        <option {{policySelected}} value="{{_id}}">{{title}}</option>
+      {{/each}}
+    </select>
+    <div class="nodes">
+      {{#if selectedPolicy}}
+        {{>node selectedPolicy}}
+      {{/if}}
+    </div>
+    <button class="create-policy">create policy</button>
+  </section>
+
+  {{else}}
+  
+  <section class="playerview">
+    <h2>Are We Reaching Our Goals?</h2>
+    <ol>
+      {{#each goalsSorted}}
+        <li>{{title}} (level: {{level}}, outflow: {{currentOutflow}})</li>
+      {{/each}}
+    </ol>
+    <h2>Our Strongest Policies</h2>
+    <ol>
+      {{#each policiesSorted}}
+        {{> policyShort}}
+      {{/each}}
+    </ol>  
+  </section>
+  
+  {{/if}}
+
+  <section class="players">
+    {{#if adminView}}
+      <h2>Edit Players</h2>
+    {{else}}
+      <h2>Play</h2>
+    {{/if}}
+    <div class="nodes">
+      {{#each players}}
+        {{> node}}
+      {{/each}}
+    </div>
+    {{#if adminView}}
+      <button class="create-player">create player</button>
+    {{/if}}
+  </section>
+  
+    <div id="jsonOutput"></div>
+    <div id="jsonImport"><textarea class="json-import-data"></textarea><br><button class="json-import">import JSON</button></div>
+  
+</body>
+
+<template name="policyShort">
+  <li>{{title}} (level: {{level}}, outflow: {{currentOutflow}}) {{#unless effective}}warning: ineffective{{/unless}} {{#if overflow}}warning: overflow{{/if}}</li>
+</template>
+
+<template name="node">
+  <div class="node">
+    <input name="title" value="{{title}}" placeholder="add a name">
+    <input name="description" value={{description}} placeholder="add the short name">
+    <div class="data">
+      {{#if adminView}}
+      <div class="data-row">
+        <label>balance</label><input name="level" class="number" value="{{level}}">
+      </div>
+      {{#if player}}
+        <div class="data-row">
+          <label>replenish</label><input name="replenish" class="number" value="{{replenish}}">
+        </div>
+      {{else}}
+        <div class="data-row">
+          <label>leakage</label><input name="decay" class="number" value="{{decay}}">
+        </div>
+      {{/if}}
+      <div class="data-row">
+        <label>max amount</label><input name="overflow" class="number" value="{{overflow}}">
+      </div>
+      <div class="data-row">
+        <label>activation amount</label><input name="threshold" class="number" value="{{threshold}}">
+      </div>
+      <!--div class="data-row">
+        <label>max total outflow</label><input name="maxOutflow" class="number" value="{{maxOutflow}}">
+      </div-->
+      {{/if}}
+      <div class="data-row">
+        <span>current outflow: {{currentOutflow}}</span>
+      </div>
+    </div>
+    <div class="connections data">
+      {{#if showConnections}}
+        <h4>outflow distribution (%)</h4>
+      {{/if}}
+      {{#each connections}}
+        {{> connection}}
+      {{/each}}
+    </div>
+    {{#if adminView}}
+      <button class="delete-node">delete</button>
+    {{/if}}
+  </div>
+</template>
+
+<template name="connection">
+  <div class="data-row">
+    <label>{{targetTitle}}</label><input name="bandwidth" value="{{bandwidth}}">
+  </div>
+</template>
+
