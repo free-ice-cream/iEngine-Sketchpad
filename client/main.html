@@ -1,19 +1,31 @@
 <head>
-  <title>Policy Garden</title>
+  <title>iEngine Sketchbook</title>
   <script src="/cytoscape/cytoscape.min.js"></script>
   <script src="/cytoscape/cytoscape-cose-bilkent.js"></script>
 
 </head>
+<template name= "authorize">
 
+  <form class= "auth-form">
+    <label>Add the Auth key here --></label>
+    <input type = "text" name="apikey" />
+    <button type="submit" class="auth-form">Authorise me</button>
+    </form>
+    <form class ="exportToGame">
+      <button type="submit" class="exportToGame">Export network to iEngine</button>
+      </form>
+</template>
 <body>
+
   <section>
+    {{> authorize}}
     <button class="toggle-admin-view">{{#if adminView}}switch to player view{{else}}switch to admin view{{/if}}</button>
   {{#if simulationRunning}}
     <button class="simulation-toggle">simulation stop</button>
   {{else}}
-    <label>speed</label> <input class="simulation-speed" value="{{simulationSpeed}}">
-    <button class="simulation-toggle">simulation start</button>
-    <button class="simulation-step">simulation step</button>
+    <!-- <label>speed</label> <input class="simulation-speed" value="{{simulationSpeed}}"> -->
+    <!-- <button class="simulation-toggle">simulation start</button>
+    <button class="simulation-step">simulation step</button> -->
     <button class="take-snapshot">create snapshot</button>
     <select class="load-snapshot">
         <option value="load">load snapshot</option>
@@ -21,12 +33,15 @@
         <option value="empty">empty</option>
       {{#each snapshots}}
         <option {{optionSelected}} value="{{name}}">{{name}}</option>
+
       {{/each}}
     </select>
     {{#if snapshotSelected}}<button class="delete-snapshot">delete snapshot</button>{{/if}}
     <button class="export-json">export json</button>
   {{/if}}
+
   </section>
+
 
   <h1>iEngine Sketchbook</h1>
 

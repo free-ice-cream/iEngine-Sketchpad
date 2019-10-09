@@ -1,21 +1,74 @@
-import { Template } from 'meteor/templating';
-import { ReactiveVar } from 'meteor/reactive-var';
+import {
+  Template
+} from 'meteor/templating';
+import {
+  ReactiveVar
+} from 'meteor/reactive-var';
+
+// import { apiKey } from './imports/api_key';
+// var api_key = apiKey();
+// console.log(api_key);
+// console.log(apiveyvar);
+// const apikey= require './imports/api_key'
+// var api_key = apikey.apiKey();
+// console.log(api_key);
 
 import './main.html';
-
+// var saveNode = false;
 Template.body.helpers({
-  goalsSorted() { return Nodes.find({state: "active", type: "goal"}, {sort: { level: -1 }}) },
-  policiesSorted() { return Nodes.find({state: "active", type: "policy"}, {sort: { level: -1 }}) },
-  goals() { return Nodes.find({state: "active", type: "goal"}) },
-  goalSelected() { return this._id == Session.get("goalSelected") ? "selected" : "" },
-  selectedGoal() { return Nodes.findOne(Session.get("goalSelected")) },
-  policies() { return Nodes.find({state: "active", type: "policy"}) },
-  policySelected() { return this._id == Session.get("policySelected") ? "selected" : "" },
-  selectedPolicy() { return Nodes.findOne(Session.get("policySelected")) },
-  players() { return Nodes.find({state: "active", type: "player"}) },
+  goalsSorted() {
+    return Nodes.find({
+      state: "active",
+      type: "goal"
+    }, {
+      sort: {
+        level: -1
+      }
+    })
+  },
+  policiesSorted() {
+    return Nodes.find({
+      state: "active",
+      type: "policy"
+    }, {
+      sort: {
+        level: -1
+      }
+    })
+  },
+  goals() {
+    return Nodes.find({
+      state: "active",
+      type: "goal"
+    })
+  },
+  goalSelected() {
+    return this._id == Session.get("goalSelected") ? "selected" : ""
+  },
+  selectedGoal() {
+    return Nodes.findOne(Session.get("goalSelected"))
+  },
+  policies() {
+    return Nodes.find({
+      state: "active",
+      type: "policy"
+    })
+  },
+  policySelected() {
+    return this._id == Session.get("policySelected") ? "selected" : ""
+  },
+  selectedPolicy() {
+    return Nodes.findOne(Session.get("policySelected"))
+  },
+  players() {
+    return Nodes.find({
+      state: "active",
+      type: "player"
+    })
+  },
   simulationRunning() {
     var state = SimulationState.findOne()
-    if(state) {
+    if (state) {
       return state.running
     } else {
       return false
@@ -23,16 +76,24 @@ Template.body.helpers({
   },
   simulationSpeed() {
     var state = SimulationState.findOne()
-    if(state) {
+    if (state) {
       return state.speed
     } else {
       return false
     }
   },
-  adminView() { return Session.get("adminView") },
-  snapshots() { return Snapshots.find({}) },
-  optionSelected() { return this.name == Session.get("snapshotSelected") ? "selected" : "" },
-  snapshotSelected() { return Session.get("snapshotSelected") }
+  adminView() {
+    return Session.get("adminView")
+  },
+  snapshots() {
+    return Snapshots.find({})
+  },
+  optionSelected() {
+    return this.name == Session.get("snapshotSelected") ? "selected" : ""
+  },
+  snapshotSelected() {
+    return Session.get("snapshotSelected")
+  }
 
 })
 
@@ -45,17 +106,21 @@ Template.body.events({
   },
   "input .simulation-speed"(event) {
     var state = SimulationState.findOne()
-    if(state) {
-      SimulationState.update(state._id, {$set: {speed:Number(event.target.value)}})
+    if (state) {
+      SimulationState.update(state._id, {
+        $set: {
+          speed: Number(event.target.value)
+        }
+      })
     }
   },
   "change .load-goal"(event, template) {
-    if(event.target.value != "load") {
+    if (event.target.value != "load") {
       Session.set("goalSelected", event.target.value)
     }
   },
   "change .load-policy"(event, template) {
-    if(event.target.value != "load") {
+    if (event.target.value != "load") {
       Session.set("policySelected", event.target.value)
     }
   },
@@ -75,7 +140,7 @@ Template.body.events({
     Meteor.call("nodes.create", "player", updatePolicyGraph)
   },
   "click .toggle-admin-view"(event) {
-    if(Session.get("adminView")) {
+    if (Session.get("adminView")) {
       Session.set("adminView", false)
     } else {
       Session.set("adminView", true)
@@ -86,15 +151,15 @@ Template.body.events({
   },
   "click .take-snapshot"(event) {
     var name = prompt("name you snapshot")
-    if(name) {
+    if (name) {
       Meteor.call("snapshots.create", name, function() {
         Session.set("snapshotSelected", name)
       })
     }
   },
   "change .load-snapshot"(event, template) {
-    if(event.target.value != "load") {
-      if(confirm("caution: when reverting to a snapshot you lose the current simulation state. proceed?")) {
+    if (event.target.value != "load") {
+      if (confirm("caution: when reverting to a snapshot you lose the current simulation state. proceed?")) {
         Meteor.call("snapshots.load", event.target.value, function() {
           updatePolicyGraph()
           Session.set("snapshotSelected", event.target.value == "empty" ? null : event.target.value)
@@ -103,7 +168,7 @@ Template.body.events({
     }
   },
   "click .delete-snapshot"(event) {
-    if(confirm("delete snapshot " + Session.get("snapshotSelected") + "?")) {
+    if (confirm("delete snapshot " + Session.get("snapshotSelected") + "?")) {
       Meteor.call("snapshots.delete", Session.get("snapshotSelected"), function() {
         Session.set("snapshotSelected", null)
       })
@@ -113,18 +178,28 @@ Template.body.events({
     $("#jsonOutput").html("<h2>JSON</h2><p>" + exportJson() + "</p>")
   },
   "click .json-import"(event) {
-    if(confirm("import json data and replace current graph?")) {
-      if(importJson($(".json-import-data").val())) {
+    if (confirm("import json data and replace current graph?")) {
+      if (importJson($(".json-import-data").val())) {
         alert("sucess")
       } else {
         alert("import error")
       }
     }
   }
+  // ,
+  // "click .authenticte"(event){
+  //   let apikeydata=
+  //   if(LocalData.find().count() === 0){
+  //     LocalData.insert({
+  //       apiKey: apikeydata;
+  //     })
+  //   }
+  //
+  // }
 })
 
 Template.body.rendered = function() {
-  Meteor.setTimeout(function() {
+  Meteor.setTimeout(function() {
     updatePolicyGraph()
   }, 2000)
 }
@@ -152,36 +227,48 @@ Template.node.helpers({
     return -this.decay
   },
   connections() {
-    return NodeConnections.find({source: this._id})
+    return NodeConnections.find({
+      source: this._id
+    })
   },
   showConnections() {
-    return NodeConnections.find({source: this._id}).count() > 0
+    return NodeConnections.find({
+      source: this._id
+    }).count() > 0
   },
-  adminView() { return Session.get("adminView") }
+  adminView() {
+    return Session.get("adminView")
+  }
 
 })
 
 Template.node.events({
-  // "change input"(event) {
-  //   if(event.target.name == "replenish") {
-  //     this["decay"] = -Number(event.target.value) // call negative decay "replenish" for player nodes
-  //   } else {
-  //     if($(event.target).hasClass("number")) {
-  //       this[event.target.name] = Number(event.target.value) // convert input to number
-  //     } else {
-  //       this[event.target.name] = event.target.value
-  //     }
-  //   }
-  //   Nodes.update(this._id, this)
-  // },
+  "change input"(event) {
+
+    if (event.target.name == "replenish") {
+      this["decay"] = -Number(event.target.value) // call negative decay "replenish" for player nodes
+    } else {
+      if ($(event.target).hasClass("number")) {
+        this[event.target.name] = Number(event.target.value) // convert input to number
+      } else {
+        this[event.target.name] = event.target.value
+      }
+    }
+    Nodes.update(this._id, this)
+
+
+  },
   "click .delete-node"(event) {
-    if(confirm("permanently delete node?")) {
+    if (confirm("permanently delete node?")) {
       Meteor.call("nodes.delete", this._id, updatePolicyGraph)
     }
   },
-  "click .save-node"(event){
+  "click .save-node"(event) {
     //
-    console.log("_id = "+ this._id)
+    // console.log("_id = "+ this._id);
+    console.log(event);
+
+
 
   }
 })
@@ -189,7 +276,7 @@ Template.node.events({
 Template.connection.helpers({
   targetTitle() {
     var node = Nodes.findOne(this.target)
-    if(node) {
+    if (node) {
       let target = Nodes.findOne(this.target)
       return (target.description ? target.description : target.title.substr(0, 20))
     }
@@ -197,7 +284,9 @@ Template.connection.helpers({
   addPossible() {
     var maxBandwidth = 100
     var totalBandwidth = 0
-    NodeConnections.find({source: this.source}).fetch().forEach(function(connection) {
+    NodeConnections.find({
+      source: this.source
+    }).fetch().forEach(function(connection) {
       totalBandwidth += connection.bandwidth
     })
     return totalBandwidth < maxBandwidth
@@ -214,8 +303,8 @@ Template.connection.events({
     var oldValue = this[event.target.name]
     this[event.target.name] = newValue
     NodeConnections.update(this._id, this)
-    if(event.target.name == "bandwidth") {
-      if(oldValue == 0 || newValue == 0) {
+    if (event.target.name == "bandwidth") {
+      if (oldValue == 0 || newValue == 0) {
         updatePolicyGraph()
       }
     }
@@ -223,15 +312,15 @@ Template.connection.events({
   "click .plus-water"(event, template) {
     this.bandwidth += 1
     NodeConnections.update(this._id, this)
-    if(this.bandwidth == 1) {
+    if (this.bandwidth == 1) {
       updatePolicyGraph()
     }
   },
   "click .minus-water"(event, template) {
-    if(this.bandwidth >= 1) {
+    if (this.bandwidth >= 1) {
       this.bandwidth -= 1
       NodeConnections.update(this._id, this)
-      if(this.bandwidth == 0) {
+      if (this.bandwidth == 0) {
         updatePolicyGraph()
       }
     }
@@ -239,3 +328,117 @@ Template.connection.events({
 
 
 })
+//
+// post json to the game server -
+
+
+Template.authorize.helpers({
+
+
+});
+
+Template.authorize.events({
+  'submit .auth-form': function(event, template) {
+    event.preventDefault();
+    var setApiKey = event.target.apikey.value;
+    console.log(setApiKey);
+
+    if (LocalData.find().count() === 0) {
+      LocalData.insert({
+        apiKey: setApiKey
+      })
+      //console.log(ap);
+    } else {
+      LocalData.update({
+        apiKey: setApiKey
+      })
+
+    }
+    //   // LocalData.update({
+    //   //   apiKey:setApiKey
+    //   // })
+    //   // console.log(LocalData.findOne());
+    // )
+
+  },
+  'submit .exportToGame': function(event, template){
+    event.preventDefault();
+  exportNewNetwork();
+  }
+})
+
+function exportNewNetwork() {
+  var networkData = exportJson();
+
+ var apiSlot = LocalData.findOne();// a hacky way of storing and retrieving the api key
+ var apiId=apiSlot._id;
+ var foo = LocalData.findOne({_id: apiId});
+ var apiKey = foo.apiKey;
+ console.log("and the key",apiKey);
+ // console.log();
+ setHeader = function(xhr) {
+   xhr.setRequestHeader("X-API-KEY", apiKey);
+ }
+ //setHeader = function(xhr) { xhr.setRequestHeader("X-API-KEY", "ea2b40c5-77ef-11e8-b325-0c4de9cfe672"); }
+
+ $.ajax({
+   // url: 'https://free-ice-cream.appspot.com/v1/players/?player=',
+   url: 'https://hivemind.fic.li/v1/network/',
+   //url: apiURL+'players/?player=',
+   type: 'POST',
+    contentType: 'application/json',
+   // data: JSON.stringify(networkData),
+    // data: networkData,
+   data: networkData,
+   success: function(data) {
+     console.log(data);
+
+     console.log("yay now lets set the table");
+     setNewTable();
+   },
+
+   error: function(error) {
+     console.log(error);
+   },
+   beforeSend: setHeader
+ });
+
+}
+
+function setNewTable() {
+  //var networkData = exportJson();
+
+ var apiSlot = LocalData.findOne();// a hacky way of storing and retrieving the api key
+ var apiId=apiSlot._id;
+ var foo = LocalData.findOne({_id: apiId});
+ var apiKey = foo.apiKey;
+ console.log("and the key",apiKey);
+ // console.log();
+ setHeader = function(xhr) {
+   xhr.setRequestHeader("X-API-KEY", apiKey);
+ }
+ //setHeader = function(xhr) { xhr.setRequestHeader("X-API-KEY", "ea2b40c5-77ef-11e8-b325-0c4de9cfe672"); }
+
+ $.ajax({
+   // url: 'https://free-ice-cream.appspot.com/v1/players/?player=',
+   url: 'https://hivemind.fic.li/v1/tables/',
+   //url: apiURL+'players/?player=',
+   type: 'POST',
+    contentType: 'application/json',
+   // data: JSON.stringify(networkData),
+    // data: networkData,
+   data: JSON.stringify({"name":"onions"}),
+   success: function(data) {
+     console.log(data);
+     console.log("cool so thats the table too");
+     // console.log("player  token= " + data.token);
+
+   },
+
+   error: function(error) {
+     console.log(error);
+   },
+   beforeSend: setHeader
+ });
+
+}
