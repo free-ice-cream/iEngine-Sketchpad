@@ -12,7 +12,7 @@ import {
 // const apikey= require './imports/api_key'
 // var api_key = apikey.apiKey();
 // console.log(api_key);
-//no chnahge here 
+//no chnahge here
 import './main.html';
 // var saveNode = false;
 Template.body.helpers({
@@ -383,7 +383,7 @@ function exportNewNetwork() {
 
  $.ajax({
    // url: 'https://free-ice-cream.appspot.com/v1/players/?player=',
-   url: 'https://hivemind.fic.li/v1/network/',
+   url: 'https://hivemind2.fic.li/v1/network/',
    //url: apiURL+'players/?player=',
    type: 'POST',
     contentType: 'application/json',
@@ -421,13 +421,13 @@ function setNewTable() {
 
  $.ajax({
    // url: 'https://free-ice-cream.appspot.com/v1/players/?player=',
-   url: 'https://hivemind.fic.li/v1/tables/',
+   url: 'https://hivemind2.fic.li/v1/tables/',
    //url: apiURL+'players/?player=',
    type: 'POST',
     contentType: 'application/json',
    // data: JSON.stringify(networkData),
     // data: networkData,
-   data: JSON.stringify({"name":"onions"}),
+   data: JSON.stringify({"name":"Nodemap"}),
    success: function(data) {
      console.log(data);
      console.log("cool so thats the table too");
